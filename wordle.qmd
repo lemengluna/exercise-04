@@ -1,0 +1,97 @@
+---
+title: "wordle"
+author: "lemeng"
+format: html
+---
+
+
+```{r}
+library(tidyverse)
+
+load_dictionary <- function(filename){
+  data <- read.table(filename, header = T)
+  return(data)
+}
+
+valid_list <- load_dictionary("collins-scrabble-words-2019.txt")
+solution_list <- load_dictionary("google-10000-english-usa-no-swears.txt") #9884 rows
+
+```
+
+winnow solution_list to only include words that are also in valid_list
+
+```{r}
+solution_list <-solution_list %>% filter(words %in% valid_list$words)
+
+```
+
+Now, there are 8336 words in updated solution_list
+
+```{r}
+
+pick_solution <- function(x){
+  d <- x %>% filter(str_length(x[,1]) == 5)
+  w <- sample(as.character(d[,1]), 1)
+  w <- str_split_1(w,"")
+  return(w)
+}
+
+evaluate_guess <- function(guess, solution){
+  guess <- toupper(guess)
+  guess <- str_split_1(guess,"")
+  e <- rep("\U2B1C", 5)
+  for (i in 1:5){
+    if (guess[i] %in% solution == F){}
+    else{ if (guess[i] != solution[i]) {e[i] = "\U1F7E8"}
+      else{e[i]= "\U1F7E9"}}
+  }
+  e <- paste(e, collapse = "")
+  return(e)}
+
+
+```
+
+```{r}
+solution <- pick_solution(solution_list)
+
+play_wordle <- function(solution, valid_list,num){
+  num_guesses <- num
+  correct <- paste(rep("\U1F7E9", 5), collapse = "")
+  lettersleft <- LETTERS
+  cat("You have", num_guesses, "chances to guess a 5-letter word.\n")
+  cat("You haven't used", paste(lettersleft,collapse = " "), "\n")
+  
+  guess_df <- data.frame(Guess = character(num_guesses), Result = character(num_guesses), stringsAsFactors = F)
+  try <- 1
+  
+  while (try <= num_guesses) {
+  repeat{
+  guess <- readline(prompt = paste("Enter guess number", try,":"))
+  guess <- toupper(guess)
+  
+  if (length(str_split_1(guess,""))==5 & guess %in% valid_list[,1])
+  {break}
+  else{readline("Invalid guess, please try again <press enter>")}}
+    
+  evaluate <- evaluate_guess(guess, solution)
+  guess_df[try,"Guess"] <- guess
+  guess_df[try,"Result"] <- evaluate
+  
+  if (identical(evaluate, correct) == TRUE) {
+    print("Congratulations! You guessed correctly!")
+    print(guess_df)
+    return()}
+  else {print(evaluate)
+    lettersleft <- setdiff(lettersleft, str_split_1(guess,""))
+    print(paste(c("You haven't used", lettersleft),collapse = " "))
+    try <- try+1
+  }
+}
+  cat("Sorry, you lost. The correct word was:", paste(solution, collapse = ""), "\n")
+  print(guess_df)
+  return()
+  }
+  
+play_wordle(solution, valid_list, 6)
+```
+
