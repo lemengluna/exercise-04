@@ -4,7 +4,6 @@ author: "lemeng"
 format: html
 ---
 
-
 ```{r}
 library(tidyverse)
 
@@ -18,14 +17,22 @@ solution_list <- load_dictionary("google-10000-english-usa-no-swears.txt") #9884
 
 ```
 
+
+
 winnow solution_list to only include words that are also in valid_list
+
+
 
 ```{r}
 solution_list <-solution_list %>% filter(words %in% valid_list$words)
 
 ```
 
+
+
 Now, there are 8336 words in updated solution_list
+
+
 
 ```{r}
 
