@@ -91,6 +91,6 @@ play_wordle <- function(solution, valid_list,num){
   return()
   }
   
-play_wordle(solution, valid_list, 6)
+
 ```
 
